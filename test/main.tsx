@@ -27,20 +27,31 @@ function App() {
   async function handleCreate(event: SubmitEvent) {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(formData.entries()) as { title: string; content: string };
     await client.notes.create(data);
     window.location.reload();
   }
   async function handleUpdate(event: SubmitEvent) {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(formData.entries()) as {
+      id: string;
+      title: string;
+      content: string;
+    };
     const { id, ...updateData } = data;
     await client.notes.update({ id, data: updateData });
     window.location.reload();
   }
   async function handleDelete(id: string) {
     await client.notes.deleteOne(id);
+    window.location.reload();
+  }
+  async function deleteAll() {
+    const confirmed = confirm("Are you sure you want to delete all notes?");
+    if (!confirmed) return;
+    const ids = notes.results.map((note) => note.id);
+    await client.notes.bulkDelete(ids);
     window.location.reload();
   }
   return (
@@ -54,7 +65,12 @@ function App() {
           Content
           <textarea placeholder="Your message..." name="content"></textarea>
         </label>
-        <button type="submit">Add Note</button>
+        <div class="flex gap-2">
+          <button type="submit">Add Note</button>
+          <button type="button" data-variant="danger" onClick={deleteAll}>
+            Delete All
+          </button>
+        </div>
       </form>
       <hr />
       <div class="flex flex-col gap-2">
@@ -67,7 +83,7 @@ function App() {
             </label>
             <label data-field>
               Content
-              <textarea defaultValue={note.content} name="content" />
+              <textarea defaultValue={note.content ?? ""} name="content" />
             </label>
             <footer class="flex gap-2">
               <button type="submit">Save</button>

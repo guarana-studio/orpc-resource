@@ -108,4 +108,16 @@ await client.users.restore(user.id);
 
 // Delete permanently
 await client.users.permanentDelete(newUser.id);
+
+// Bulk Create
+const newUsers = await client.users.bulkCreate([
+  { email: "user1@example.com", name: "User 1" },
+  { email: "user2@example.com", name: "User 2" },
+]);
+
+// Bulk Delete (soft delete)
+await client.users.bulkDelete([user1.id, user2.id]);
+
+// Bulk Restore
+await client.users.bulkRestore([user1.id, user2.id]);
 ```
