@@ -1,11 +1,22 @@
 {
   "name": "orpc-resource",
-  "module": "src/index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "lint": "oxlint",
+    "fmt": "oxfmt"
+  },
+  "dependencies": {
+    "@bwg-labs/drizzle-crud": "^0.2.1"
+  },
   "devDependencies": {
+    "@orpc/server": "^1.13.6",
     "@tsconfig/bun": "^1.0.10",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-orm": "^0.45.1",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0"
   },
   "peerDependencies": {
     "typescript": "^5"

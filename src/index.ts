@@ -1,1 +1,1 @@
-console.log("Hello via Bun!");
+export { crud } from "./crud";
