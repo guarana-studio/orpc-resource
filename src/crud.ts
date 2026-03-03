@@ -6,21 +6,21 @@ import type {
 } from "@bwg-labs/drizzle-crud";
 import { drizzleCrud } from "@bwg-labs/drizzle-crud";
 import { zod } from "@bwg-labs/drizzle-crud/zod";
-import { os, type Builder } from "@orpc/server";
+import { ORPCError, os, type Builder } from "@orpc/server";
 import { type } from "@orpc/server";
-import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
 type CrudOptionsWithBase<
   TDatabase extends DrizzleDatabase,
   TTable extends DrizzleTableWithId,
-> = CrudOptions<TDatabase, TTable> & { base?: Builder<any, any, any, any, any, any> };
+  TContext extends Record<string, unknown>,
+> = CrudOptions<TDatabase, TTable> & { base?: Builder<TContext, TContext, any, any, any, any> };
 
-export function crud(db: LibSQLDatabase) {
+export function crud(db: DrizzleDatabase) {
   const crud = drizzleCrud(db, { validation: zod() });
 
-  function resource(
+  function resource<T extends Record<string, unknown>>(
     table: DrizzleTableWithId,
-    crudOptions: CrudOptionsWithBase<typeof db, DrizzleTableWithId>,
+    crudOptions: CrudOptionsWithBase<typeof db, DrizzleTableWithId, T>,
   ) {
     type LocalTable = typeof table;
     const localResource = crud(table, crudOptions);
@@ -32,7 +32,9 @@ export function crud(db: LibSQLDatabase) {
       findOne: base
         .input(type<Partial<LocalTable["$inferSelect"]>>())
         .handler(async ({ input }) => {
-          return localResource.findOne(input);
+          const result = await localResource.findOne(input);
+          if (!result) throw new ORPCError("NOT_FOUND");
+          return result;
         }),
       create: base.input(type<LocalTable["$inferInsert"]>()).handler(async ({ input }) => {
         return localResource.create(input);
