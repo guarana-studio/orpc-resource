@@ -53,7 +53,7 @@ export const note = sqliteTable("note", {
 ```ts
 // src/router.ts
 import { os } from "@orpc/server";
-import { crud } from "./crud";
+import { crud } from "orpc-resource";
 import { user, note } from "./schema";
 import { authorized } from "./server/orpc";
 import { db } from "./db";
