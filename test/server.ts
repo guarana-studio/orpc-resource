@@ -22,6 +22,10 @@ const { resource } = crud(db);
 const router = {
   notes: resource(schema.note, {
     searchFields: ["title", "content"],
+    softDelete: {
+      field: "deletedAt",
+      deletedValue: () => new Date(),
+    },
   }),
 };
 

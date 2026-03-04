@@ -66,7 +66,7 @@ export const router = {
     allowedFilters: ["role"],
     softDelete: {
       field: "deletedAt",
-      defaultValue: new Date(),
+      defaultValue: () => new Date(),
     },
   }),
   notes: resource(note, {

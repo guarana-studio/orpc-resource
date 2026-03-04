@@ -7,7 +7,7 @@ export const note = sqliteTable("note", {
     .$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
   content: text("content"),
-  deletedAt: integer("deleted_at", { mode: "timestamp" }),
+  deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
