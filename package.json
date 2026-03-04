@@ -30,6 +30,8 @@
     "@knadh/oat": "^0.4.1",
     "@libsql/client": "^0.17.0",
     "@orpc/client": "^1.13.6",
+    "@orpc/openapi": "^1.13.6",
+    "@orpc/zod": "^1.13.6",
     "@tsconfig/bun": "^1.0.10",
     "@types/bun": "latest",
     "drizzle-kit": "^0.31.9",

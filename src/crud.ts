@@ -35,18 +35,46 @@ export function crud(db: DrizzleDatabase) {
     const partialInsertSchema = z.custom<Partial<InsertType>>();
     const idSchema = z.custom<SelectType["id"]>();
 
+    // Output schemas for OpenAPI spec generation
+    const selectSchema = z.custom<SelectType>();
+    const listResponseSchema = z.object({
+      hasNextPage: z.boolean(),
+      hasPreviousPage: z.boolean(),
+      page: z.number(),
+      perPage: z.number(),
+      results: z.array(selectSchema),
+      totalItems: z.number(),
+      totalPages: z.number(),
+    });
+    const successSchema = z.object({ success: z.boolean() });
+    const bulkCreateResponseSchema = z.object({
+      success: z.boolean(),
+      count: z.number(),
+      items: z.array(selectSchema),
+    });
+    const bulkSuccessSchema = z.object({ success: z.boolean(), count: z.number() });
+
     return {
-      list: base.input(z.custom<ListParams<LocalTable>>()).handler(async ({ input }) => {
-        return localResource.list(input);
-      }),
-      findOne: base.input(partialSelectSchema).handler(async ({ input }) => {
-        const result = await localResource.findOne(input);
-        if (!result) throw new ORPCError("NOT_FOUND");
-        return result;
-      }),
-      create: base.input(insertSchema).handler(async ({ input }) => {
-        return localResource.create(input);
-      }),
+      list: base
+        .input(z.custom<ListParams<LocalTable>>())
+        .output(listResponseSchema)
+        .handler(async ({ input }) => {
+          return localResource.list(input);
+        }),
+      findOne: base
+        .input(partialSelectSchema)
+        .output(selectSchema)
+        .handler(async ({ input }) => {
+          const result = await localResource.findOne(input);
+          if (!result) throw new ORPCError("NOT_FOUND");
+          return result;
+        }),
+      create: base
+        .input(insertSchema)
+        .output(selectSchema)
+        .handler(async ({ input }) => {
+          return localResource.create(input);
+        }),
       update: base
         .input(
           z.object({
@@ -54,27 +82,46 @@ export function crud(db: DrizzleDatabase) {
             data: partialInsertSchema,
           }),
         )
+        .output(selectSchema)
         .handler(async ({ input }) => {
           return localResource.update(input.id, input.data);
         }),
-      deleteOne: base.input(idSchema).handler(async ({ input }) => {
-        return localResource.deleteOne(input);
-      }),
-      restore: base.input(idSchema).handler(async ({ input }) => {
-        return localResource.restore(input);
-      }),
-      permanentDelete: base.input(idSchema).handler(async ({ input }) => {
-        return localResource.permanentDelete(input);
-      }),
-      bulkCreate: base.input(z.array(insertSchema)).handler(async ({ input }) => {
-        return localResource.bulkCreate(input);
-      }),
-      bulkDelete: base.input(z.array(idSchema)).handler(async ({ input }) => {
-        return localResource.bulkDelete(input);
-      }),
-      bulkRestore: base.input(z.array(idSchema)).handler(async ({ input }) => {
-        return localResource.bulkRestore(input);
-      }),
+      deleteOne: base
+        .input(idSchema)
+        .output(successSchema)
+        .handler(async ({ input }) => {
+          return localResource.deleteOne(input);
+        }),
+      restore: base
+        .input(idSchema)
+        .output(successSchema)
+        .handler(async ({ input }) => {
+          return localResource.restore(input);
+        }),
+      permanentDelete: base
+        .input(idSchema)
+        .output(successSchema)
+        .handler(async ({ input }) => {
+          return localResource.permanentDelete(input);
+        }),
+      bulkCreate: base
+        .input(z.array(insertSchema))
+        .output(bulkCreateResponseSchema)
+        .handler(async ({ input }) => {
+          return localResource.bulkCreate(input);
+        }),
+      bulkDelete: base
+        .input(z.array(idSchema))
+        .output(bulkSuccessSchema)
+        .handler(async ({ input }) => {
+          return localResource.bulkDelete(input);
+        }),
+      bulkRestore: base
+        .input(z.array(idSchema))
+        .output(bulkSuccessSchema)
+        .handler(async ({ input }) => {
+          return localResource.bulkRestore(input);
+        }),
     };
   }
 

@@ -1,5 +1,7 @@
+import { OpenAPIGenerator } from "@orpc/openapi";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { drizzle } from "drizzle-orm/libsql";
 import { z } from "zod";
 
@@ -31,9 +33,23 @@ const handler = new RPCHandler(router, {
   ],
 });
 
+const generator = new OpenAPIGenerator({
+  schemaConverters: [new ZodToJsonSchemaConverter()],
+});
+
+const spec = await generator.generate(router, {
+  info: {
+    title: "orpc-resource API",
+    version: "1.0.0",
+  },
+});
+
 const server = Bun.serve({
   routes: {
     "/": front,
+    "/openapi.json": new Response(JSON.stringify(spec), {
+      headers: { "Content-Type": "application/json" },
+    }),
   },
   async fetch(req) {
     const { matched, response } = await handler.handle(req, {
