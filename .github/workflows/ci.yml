@@ -1,0 +1,17 @@
+name: continuous-integration
+on:
+  push:
+    branches: ["main"]
+jobs:
+  build_nightly:
+    name: Build Nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install
+      - name: Build module
+        run: bun run build
+      - name: Publish nightly build to pkg.pr.new
+        run: bunx pkg-pr-new publish

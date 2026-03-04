@@ -30,7 +30,6 @@ export function crud(db: DrizzleDatabase) {
     const localResource = crud(table, crudOptions);
     const base = crudOptions.base ?? os;
 
-    const selectSchema = z.custom<SelectType>();
     const insertSchema = z.custom<InsertType>();
     const partialSelectSchema = z.custom<Partial<SelectType>>();
     const partialInsertSchema = z.custom<Partial<InsertType>>();
