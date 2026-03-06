@@ -11,7 +11,7 @@ import type { Router } from "./server";
 const root = document.getElementById("app")!;
 
 const link = new RPCLink({
-  url: "http://localhost:3000/rpc",
+  url: `${window.location.origin}/rpc`,
   interceptors: [
     onError((error) => {
       console.error(error);
@@ -27,7 +27,10 @@ function App() {
   async function handleCreate(event: SubmitEvent) {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries()) as { title: string; content: string };
+    const data = Object.fromEntries(formData.entries()) as {
+      title: string;
+      content: string;
+    };
     await client.notes.create(data);
     window.location.reload();
   }
